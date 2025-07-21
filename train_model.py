@@ -13,15 +13,15 @@ import torch
 def load_dataset(config):
     train_dataset = SeeFoodCocoDataset(
         root="SeeFoodDataset/train",
-        ann_file="SeeFoodDataset/train/_annotations.coco.json"
+        ann_file="../SeeFoodDataset/train/_annotations.coco.json"
     )
     val_dataset = SeeFoodCocoDataset(
         root="SeeFoodDataset/valid",
-        ann_file="SeeFoodDataset/valid/_annotations.coco.json"
+        ann_file="../SeeFoodDataset/valid/_annotations.coco.json"
     )
     test_dataset = SeeFoodCocoDataset(
         root="SeeFoodDataset/test",
-        ann_file="SeeFoodDataset/valid/_annotations.coco.json"
+        ann_file="../SeeFoodDataset/valid/_annotations.coco.json"
     )
     train_iter = torch.utils.data.DataLoader(train_dataset, config["batch_size"], shuffle=True)
     val_iter = torch.utils.data.DataLoader(val_dataset, config["batch_size"])
@@ -190,7 +190,6 @@ def save_random_predictions(model, test_idxs, device, run_id):
 def main():
     with open('setup_params.json', 'r') as f:
         config = json.load(f)
-    
     data_config = config["data_config"]
     model_config = config["model_config"]
     train_config = config["train_config"]
@@ -212,7 +211,8 @@ def main():
          test_model(model, test_iter, device)
          save_random_predictions(model, config["test_idxs"], device, run.info.run_id)
 
-        
+if __name__ == "__main__":
+    main()
         
     
 
