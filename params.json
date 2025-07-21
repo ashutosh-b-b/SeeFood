@@ -1,0 +1,53 @@
+[
+  {
+    "run_id": "baseline",
+    "data_config": {
+        "batch_size": 64,
+        "img_size": 512
+    },
+    "model_config": {
+      "base_channels": [16, 32, 64],
+      "intermediate_channel": 128,
+      "num_blocks": 4
+    },
+    "train_config": {
+      "learning_rate": 0.001,
+      "num_epochs": 20
+    }
+  },
+  {
+    "run_id": "smaller_model",
+     "data_config": {
+        "batch_size": 64,
+        "img_size": 512
+    },
+    "model_config": {
+      "base_channels": [16, 32, 64],
+      "intermediate_channel": 128,
+      "num_blocks": 3,
+      "sizes": [[0.42, 0.48], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]]
+    },
+    "train_config": {
+      "learning_rate": 0.002,
+      "num_epochs": 20
+    }
+  },
+  {
+    "experiment_name": "model_ratio",
+     "data_config": {
+        "batch_size": 64,
+        "img_size": 512
+    },
+    "model_config": {
+      "base_channels": [32, 64, 128],
+      "intermediate_channel": 256,
+      "num_blocks": 3,
+      "sizes": [[0.42, 0.48], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]]
+    },
+    "train_config": {
+      "learning_rate": 0.002,
+      "num_epochs": 20
+    }
+  }
+
+]
