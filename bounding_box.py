@@ -224,15 +224,16 @@ def show_bboxes(axes, bboxes, labels=None, colors=None):
                       bbox=dict(facecolor=color, lw=0))
 
 def display(img, output, threshold, idx_to_label):
-    fig = plt.imshow(img)
+    fig, ax = plt.subplots()
+    ax.imshow(img)
     for row in output:
         score = float(row[1])
         if score < threshold:
             continue
-        h, w = img.shape[:2]
+        w, h = img.size[:2]
         bbox = [row[2:6] * torch.tensor((w, h, w, h), device=row.device)]
-        label_idx = int(row[1])
-        label = idx_to_label(label_idx)
+        label_idx = int(row[0])
+        label = idx_to_label[label_idx]
         text = f"{label} {score:.2f}"
-        show_bboxes(fig.axes, bbox, text, 'w')
+        show_bboxes(ax, bbox, text, 'w')
     return fig

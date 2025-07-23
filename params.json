@@ -1,22 +1,51 @@
 [
   {
-    "run_id": "baseline",
+    "tag": "baseline",
+    "experiment_name": "test-experiment",
     "data_config": {
-        "batch_size": 64,
+        "batch_size": 128,
         "img_size": 512
     },
     "model_config": {
       "base_channels": [16, 32, 64],
       "intermediate_channel": 128,
-      "num_blocks": 4
+      "num_blocks": 4,
+      "num_classes": 31,
+      "ratios": [1, 2, 0.5],
+      "sizes": [[0.2, 0.272], [0.37, 0.447], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]]
     },
     "train_config": {
-      "learning_rate": 0.001,
+      "device": 0,
+      "lr": 0.2,
       "num_epochs": 20
-    }
+    },
+    "test_idxs": [5, 10, 123, 452, 12, 67, 72]
   },
   {
-    "run_id": "smaller_model",
+    "tag": "small-model",
+    "experiment_name": "test-experiment",
+    "data_config": {
+        "batch_size": 128,
+        "img_size": 512
+    },
+    "model_config": {
+      "base_channels": [16, 32, 64],
+      "intermediate_channel": 128,
+      "num_blocks": 3,
+      "num_classes": 31,
+      "ratios": [1, 2, 0.5],
+      "sizes": [[0.42, 0.48], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]]
+    },
+    "train_config": {
+      "device": 0,
+      "lr": 0.2,
+      "num_epochs": 20
+    },
+    "test_idxs": [5, 10]
+  },
+
+  {
+    "run_id": "baseline",
      "data_config": {
         "batch_size": 64,
         "img_size": 512
@@ -28,7 +57,8 @@
       "sizes": [[0.42, 0.48], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]]
     },
     "train_config": {
-      "learning_rate": 0.002,
+      "device": 0,
+      "lr": 0.2,
       "num_epochs": 20
     }
   },
@@ -45,7 +75,8 @@
       "sizes": [[0.42, 0.48], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]]
     },
     "train_config": {
-      "learning_rate": 0.002,
+      "device": 0,
+      "lr": 0.2,
       "num_epochs": 20
     }
   }

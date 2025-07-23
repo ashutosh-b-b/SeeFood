@@ -1,0 +1,8 @@
+SeeFoodDataset/
+.ipynb_checkpoints
+__pycache__
+*.ipynb
+test_params.json
+artifacts/
+mlruns/
+actual_*.json

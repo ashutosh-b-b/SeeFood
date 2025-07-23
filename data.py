@@ -25,6 +25,7 @@ class SeeFoodCocoDataset(torch.utils.data.Dataset):
 
         self.ids = list(self.image_id_to_info.keys())
         self.cat_id_to_name = {cat["id"]: cat["name"] for cat in self.coco_data["categories"]}
+        self.idx_to_labels = {v: k for k, v in self.cat_id_to_name.items()}
 
     def __len__(self):
         return len(self.ids)

@@ -2,6 +2,9 @@ from bounding_box import multibox_detection, multibox_prior
 import torch 
 from torch import nn 
 from torch.nn import functional as F
+import torchvision.models as models
+from collections import defaultdict
+
 
 class ClassPredictionLayer(nn.Module):
     def __init__(self, num_inputs, num_anchors, num_classes):
@@ -46,7 +49,29 @@ class BaseNet(nn.Module):
         
     def forward(self, x):
         return self.net(x)
+
+class BaseNetPreTrainedVGG(nn.Module):
+    def __init__(self, channels = [64, 128]):
+        super().__init__()
+        blocks = [] 
+        vgg16 = models.vgg16(pretrained=True)
+        base_layers = nn.Sequential(*list(vgg16.features.children())[:5])  # conv1 + ReLU + conv2 + ReLU + MaxPool
+        for param in base_layers.parameters():
+            param.requires_grad = False
         
+        # base layer output is 64 channels
+        assert channels[0] == 64, "Starting channel for base_channels should be 64"
+        blocks.append(base_layers)
+        for i in range(len(channels) - 1):
+            blocks.append(
+                VGGBlock(channels[i], channels[i+1])
+            )
+
+        self.net = nn.Sequential(*blocks)
+        
+    def forward(self, x):
+        return self.net(x)
+
 class MultiScaleFeatureLayer(nn.Module): 
     def __init__(self, block, cls_pred_layer, bbox_pred_layer, size, ratio):
         super().__init__()
@@ -69,6 +94,7 @@ class SSD(nn.Module):
                  num_blocks=4, 
                  sizes = [[0.2, 0.272], [0.37, 0.447], [0.54, 0.619], [0.71, 0.79], [0.88, 0.961]],
                  ratios = [1, 2, 0.5],
+                 use_pretrained_vgg = False,
                  **kwargs):
         
         super(SSD, self).__init__(**kwargs)
@@ -80,7 +106,11 @@ class SSD(nn.Module):
         self.sizes = sizes 
         self.ratios = ratios
         self.num_blocks = num_blocks
-        base_layer = MultiScaleFeatureLayer(BaseNet(channels = base_channels),
+        if use_pretrained_vgg:
+            base_net = BaseNetPreTrainedVGG(channels = base_channels)
+        else:
+            base_net = BaseNet(channels = base_channels)
+        base_layer = MultiScaleFeatureLayer(base_net,
             ClassPredictionLayer(base_channels[-1], self.num_anchors, num_classes), 
             BBoxPredictionLayer(base_channels[-1], self.num_anchors),
             sizes[0],
@@ -122,11 +152,58 @@ class SSD(nn.Module):
         bbox_preds = self.concat_preds(bbox_preds)
         return anchors, cls_preds, bbox_preds
         
-def predict(net, X, device):
+def predict(net, X):
     net.eval()
-    anchors, cls_preds, bbox_preds = net(X.to(device))
+    anchors, cls_preds, bbox_preds = net(X)
     cls_probs = F.softmax(cls_preds, dim=2).permute(0, 2, 1)
     output = multibox_detection(cls_probs, bbox_preds, anchors)
     idx = [i for i, row in enumerate(output[0]) if row[0] != -1]
     return output[0, idx]
 
+def predict_batch(model, X, device):
+    model.eval()
+    anchors, cls_preds, bbox_preds = model(X.to(device))
+    cls_probs = F.softmax(cls_preds, dim=2).permute(0, 2, 1)
+    output = multibox_detection(cls_probs, bbox_preds, anchors)
+    valid_mask = output[:, :, 0] != -1
+    valid_counts = valid_mask.sum(dim=1)
+    filtered_output = [img_out[mask] for img_out, mask in zip(output, valid_mask)]
+    return filtered_output
+
+
+def per_class_accuracy(model, data, device):
+    correct_per_class = defaultdict(int)
+    total_per_class = defaultdict(int)
+
+    with torch.no_grad():
+        for x, y in data:
+            x, y = x.to(device), y.to(device)
+            out = predict_batch(model, x, device)
+            high_confidence_predictions = []
+
+            for o in out:
+                if o.shape[0] < 2 or o.shape[1] == 0:
+                    continue  # skip invalid or empty predictions
+                classes = o[0, :].int()
+                confidences = o[1, :]
+
+                high_conf_idx = torch.argmax(confidences)
+                high_conf_pred = classes[high_conf_idx]
+                high_confidence_predictions.append(high_conf_pred)
+
+            y_true = y[:, 0, 0].cpu()
+            y_pred = torch.stack(high_confidence_predictions).cpu()
+
+            for true, pred in zip(y_true, y_pred):
+                true = int(true.item())
+                total_per_class[true] += 1
+                if pred.item() == true:
+                    correct_per_class[true] += 1
+
+    # Final per-class accuracy
+    per_class_accuracy = {
+        cls: correct_per_class[cls] / total_per_class[cls]
+        for cls in total_per_class
+    }
+
+    return per_class_accuracy
