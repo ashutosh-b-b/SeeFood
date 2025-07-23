@@ -1,13 +1,5 @@
-SeeFoodDataset/
-.ipynb_checkpoints
-__pycache__
-*.ipynb
-test_params.json
-artifacts/
-mlruns/
-actual_*.json
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-.vscode/
 # dependencies
 node_modules/
 
