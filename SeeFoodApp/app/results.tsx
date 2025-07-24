@@ -1,17 +1,12 @@
-/*
-======================================================================
-app/results.tsx (Results Screen)
-======================================================================
-This screen is now a simple display component. It receives the
-final prediction data from the loader screen and renders it.
-*/
+
 import React from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { FoodPrediction } from '../services/api';
 
 export default function ResultsScreen() {
   const { predictionData } = useLocalSearchParams<{ predictionData: string }>();
+  const router = useRouter();
   
   let prediction: FoodPrediction | null = null;
   if (predictionData) {
@@ -22,34 +17,48 @@ export default function ResultsScreen() {
     }
   }
 
+  const handleTryAgain = () => {
+    // Use replace to go back to the camera for a clean navigation stack
+    router.replace('/camera');
+  };
+
   if (!prediction) {
     return (
       <View style={styles.container}>
         <Text style={styles.resultText}>Could not identify food.</Text>
+        <TouchableOpacity style={styles.button} onPress={handleTryAgain}>
+          <Text style={styles.buttonText}>Try Again</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.resultText}>
-        {prediction.name}
-      </Text>
-      <Text style={styles.confidenceText}>
-        Confidence: {(prediction.confidence * 100).toFixed(0)}%
-      </Text>
+      <View style={styles.content}>
+        <Text style={styles.resultText}>
+          {prediction.name}
+        </Text>
+        <Text style={styles.confidenceText}>
+          Per 100 gm
+        </Text>
 
-      <View style={styles.nutritionContainer}>
-        <Text style={styles.nutritionTitle}>Nutritional Information</Text>
-        <View style={styles.nutritionTable}>
-          {Object.entries(prediction.nutrition).map(([key, value]) => (
-            <View key={key} style={styles.nutritionRow}>
-              <Text style={styles.nutritionLabel}>{key}</Text>
-              <Text style={styles.nutritionValue}>{value}</Text>
-            </View>
-          ))}
+        <View style={styles.nutritionContainer}>
+          <Text style={styles.nutritionTitle}>Nutritional Information</Text>
+          <View style={styles.nutritionTable}>
+            {Object.entries(prediction.nutrition).map(([key, value]) => (
+              <View key={key} style={styles.nutritionRow}>
+                <Text style={styles.nutritionLabel}>{key}</Text>
+                <Text style={styles.nutritionValue}>{value}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
+      
+      <TouchableOpacity style={styles.button} onPress={handleTryAgain}>
+        <Text style={styles.buttonText}>Try Again</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -58,9 +67,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1c1c1e',
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Pushes content and button apart
     padding: 20,
+    paddingBottom: 40, // Add padding at the bottom
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   resultText: {
     fontSize: 48,
@@ -107,5 +121,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     fontWeight: '600',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    alignSelf: 'stretch', // Make button stretch to container padding
+    marginTop: 20,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

@@ -28,7 +28,7 @@ export default function SplashScreen() {
     <View style={styles.container}>
       {/* Ensure you have a logo.png in your assets folder */}
       <Image
-        source={require('../assets/logo.png')}
+        source={require('../assets/new_logo.png')}
         style={styles.logo}
       />
     </View>
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // Changed background to black
-    backgroundColor: '#000',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },

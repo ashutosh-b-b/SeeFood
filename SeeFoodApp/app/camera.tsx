@@ -2,8 +2,8 @@
 ======================================================================
 app/camera.tsx (Camera Screen)
 ======================================================================
-This screen now only takes a picture and gets its local file URI,
-then immediately navigates to the new loader screen.
+This screen now features a "cropped" camera view, showing the camera
+preview inside a square frame instead of full-screen.
 */
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
@@ -63,11 +63,17 @@ export default function CameraScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing="back" ref={cameraRef}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.captureButton} onPress={takePicture} />
-        </View>
-      </CameraView>
+      <Text style={styles.promptText}>Position food in the square</Text>
+      
+      {/* This is the frame for our camera view */}
+      <View style={styles.cameraContainer}>
+        <CameraView style={styles.camera} facing="back" ref={cameraRef} />
+      </View>
+      
+      {/* The capture button is now positioned below the frame */}
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity style={styles.captureButton} onPress={takePicture} />
+      </View>
     </View>
   );
 }
@@ -76,24 +82,33 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
         backgroundColor: '#000',
     },
-    camera: {
-        flex: 1,
-    },
-    permissionText: {
-        textAlign: 'center',
+    promptText: {
         color: 'white',
         fontSize: 18,
-        margin: 20,
+        fontWeight: '500',
+        position: 'absolute',
+        top: '15%',
     },
-    buttonContainer: {
-        flex: 1,
-        backgroundColor: 'transparent',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-        marginBottom: 40,
+    // This view creates the square frame
+    cameraContainer: {
+        width: '85%',
+        aspectRatio: 1, // This makes the height equal to the width, creating a square
+        borderRadius: 20,
+        overflow: 'hidden', // This "crops" the camera view to the container's bounds
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    camera: {
+        flex: 1, // The CameraView will fill the square container
+    },
+    bottomContainer: {
+        position: 'absolute',
+        bottom: 50,
+        width: '100%',
+        alignItems: 'center',
     },
     captureButton: {
         width: 70,
@@ -102,6 +117,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderWidth: 5,
         borderColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    permissionText: {
+        textAlign: 'center',
+        color: 'white',
+        fontSize: 18,
+        margin: 20,
     },
     button: {
         backgroundColor: '#007AFF',
