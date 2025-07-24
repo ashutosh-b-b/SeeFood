@@ -9,7 +9,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    ```bash
    npm install
    ```
-
+2. Make a .env file and add `EXPO_PUBLIC_API_URL` as the URL of the server.
 2. Start the app
 
    ```bash
