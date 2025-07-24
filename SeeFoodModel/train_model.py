@@ -1,5 +1,5 @@
 from bounding_box import multibox_target, display
-from model import SSD, predict, per_class_accuracy
+from model import SSD, predict, per_class_accuracy, configure_model
 from loss import calc_loss, cls_eval, bbox_eval
 from data import SeeFoodCocoDataset 
 import mlflow 
@@ -31,31 +31,6 @@ def load_dataset(config):
     val_iter = torch.utils.data.DataLoader(val_dataset, config["batch_size"])
     test_iter = torch.utils.data.DataLoader(test_dataset, config["batch_size"])
     return train_iter, val_iter, test_iter
-
-def configure_model(params): 
-    sizes = params["sizes"]
-    num_blocks = params["num_blocks"]
-    
-    assert len(sizes) == num_blocks + 1, "Sizes and Number of blocks donot match"
-
-    base_channels = params["base_channels"]
-    intermediate_channel = params["intermediate_channel"]
-    num_classes = params["num_classes"]
-    sizes = params["sizes"]
-    ratios = params["ratios"]
-    num_blocks = params["num_blocks"]
-    use_pretrained_vgg = params["use_pretrained"]
-    model = SSD(
-        num_classes, 
-        base_channels = base_channels,
-        intermediate_channel = intermediate_channel,
-        sizes = sizes,
-        ratios = ratios,
-        num_blocks = num_blocks,
-        use_pretrained_vgg = use_pretrained_vgg
-    )
-
-    return model 
 
 def get_device(device):
     return torch.device(f'cuda:{device}')

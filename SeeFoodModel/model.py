@@ -207,3 +207,28 @@ def per_class_accuracy(model, data, device):
     }
 
     return per_class_accuracy
+
+def configure_model(params): 
+    sizes = params["sizes"]
+    num_blocks = params["num_blocks"]
+    
+    assert len(sizes) == num_blocks + 1, "Sizes and Number of blocks donot match"
+
+    base_channels = params["base_channels"]
+    intermediate_channel = params["intermediate_channel"]
+    num_classes = params["num_classes"]
+    sizes = params["sizes"]
+    ratios = params["ratios"]
+    num_blocks = params["num_blocks"]
+    use_pretrained_vgg = params["use_pretrained"]
+    model = SSD(
+        num_classes, 
+        base_channels = base_channels,
+        intermediate_channel = intermediate_channel,
+        sizes = sizes,
+        ratios = ratios,
+        num_blocks = num_blocks,
+        use_pretrained_vgg = use_pretrained_vgg
+    )
+
+    return model 
